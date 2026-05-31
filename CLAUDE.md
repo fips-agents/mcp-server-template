@@ -31,6 +31,9 @@ make test-local
 # Deploy to OpenShift
 make deploy PROJECT=my-project
 
+# Deploy to a specific cluster context
+make deploy PROJECT=my-project CONTEXT=my-cluster
+
 # Build container for OpenShift (Mac)
 podman build --platform linux/amd64 -f Containerfile -t my-mcp:latest .
 ```
@@ -326,10 +329,12 @@ mcp-test-mcp test_tool --server-url https://<route>/mcp/ \
 
 ### OpenShift Deployment
 
-Each MCP server should deploy to its own OpenShift project to avoid naming collisions:
+Each MCP server should deploy to its own OpenShift project to avoid naming collisions.
+Pass `CONTEXT` to target a specific cluster without mutating shared kubeconfig state:
 
 ```bash
 make deploy PROJECT=my-mcp-server
+make deploy PROJECT=my-mcp-server CONTEXT=my-cluster
 ```
 
 ### Pre-deployment Checklist

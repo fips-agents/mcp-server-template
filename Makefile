@@ -4,6 +4,7 @@
 VENV ?= .venv
 PYTHON ?= python3
 PROJECT ?= mcp-demo
+CONTEXT ?=
 
 # Default target
 help:
@@ -16,8 +17,8 @@ help:
 	@echo "  make test        - Run pytest suite"
 	@echo ""
 	@echo "OpenShift Deployment:"
-	@echo "  make deploy      - Deploy to OpenShift (PROJECT=name)"
-	@echo "  make clean       - Remove from OpenShift"
+	@echo "  make deploy      - Deploy to OpenShift (PROJECT=name [CONTEXT=name])"
+	@echo "  make clean       - Remove from OpenShift (PROJECT=name [CONTEXT=name])"
 	@echo ""
 	@echo "Other:"
 	@echo "  make help        - Show this help message"
@@ -48,12 +49,12 @@ test:
 # Deploy to OpenShift
 deploy:
 	@echo "Deploying to OpenShift project: $(PROJECT)"
-	./deploy.sh $(PROJECT)
+	./deploy.sh $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),)
 
 # Clean up OpenShift deployment
 clean:
 	@echo "Cleaning up OpenShift project: $(PROJECT)"
-	@oc delete -f openshift.yaml -n $(PROJECT) --ignore-not-found=true || echo "Not deployed or already cleaned"
+	@oc delete -f openshift.yaml -n $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),) --ignore-not-found=true || echo "Not deployed or already cleaned"
 
 # Development shortcuts
 dev: run-local

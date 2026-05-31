@@ -1,35 +1,52 @@
 #!/bin/bash
 # Simple deployment script for MCP server to OpenShift
-# Usage: ./deploy.sh [project-name]
+# Usage: ./deploy.sh [project-name] [--context=name]
 
 set -e
 
-PROJECT=${1:-mcp-demo}
+PROJECT="mcp-demo"
+CTX=""
+
+for arg in "$@"; do
+    case "$arg" in
+        --context=*) CTX="${arg#--context=}" ;;
+        *) PROJECT="$arg" ;;
+    esac
+done
+
+# Build oc flags for context (empty string if no context specified)
+OC_CTX=""
+if [ -n "$CTX" ]; then
+    OC_CTX="--context=$CTX"
+fi
 
 echo "========================================="
 echo "MCP Server Deployment to OpenShift"
 echo "========================================="
 echo "Project: $PROJECT"
+if [ -n "$CTX" ]; then
+    echo "Context: $CTX"
+fi
 echo ""
 
 # Check if logged in to OpenShift
-if ! oc whoami &>/dev/null; then
+if ! oc whoami $OC_CTX &>/dev/null; then
     echo "Error: Not logged in to OpenShift. Please run 'oc login' first."
     exit 1
 fi
 
-# Create project if it doesn't exist
-echo "→ Setting up project..."
-if oc project $PROJECT &>/dev/null; then
-    echo "  Using existing project: $PROJECT"
+# Create namespace if it doesn't exist
+echo "→ Setting up namespace..."
+if oc get namespace "$PROJECT" $OC_CTX &>/dev/null; then
+    echo "  Using existing namespace: $PROJECT"
 else
-    echo "  Creating new project: $PROJECT"
-    oc new-project $PROJECT
+    echo "  Creating new namespace: $PROJECT"
+    oc create namespace "$PROJECT" $OC_CTX
 fi
 
 # Apply OpenShift resources
 echo "→ Applying OpenShift resources..."
-sed "s|image: mcp-server:latest|image: image-registry.openshift-image-registry.svc:5000/$PROJECT/mcp-server:latest|g" openshift.yaml | oc apply -f - -n $PROJECT
+sed "s|image: mcp-server:latest|image: image-registry.openshift-image-registry.svc:5000/$PROJECT/mcp-server:latest|g" openshift.yaml | oc apply -f - -n "$PROJECT" $OC_CTX
 
 # Start build
 echo "→ Building container image..."
@@ -56,16 +73,16 @@ if [ "$FIXED_COUNT" -gt "0" ]; then
 fi
 
 echo "  Starting binary build with filtered context..."
-oc start-build mcp-server --from-dir="$BUILD_DIR" --follow -n $PROJECT
+oc start-build mcp-server --from-dir="$BUILD_DIR" --follow -n "$PROJECT" $OC_CTX
 
 # Wait for rollout
 echo "→ Deploying application..."
-oc rollout restart deployment/mcp-server -n $PROJECT 2>/dev/null || true
-oc rollout status deployment/mcp-server -n $PROJECT --timeout=300s
+oc rollout restart deployment/mcp-server -n "$PROJECT" $OC_CTX 2>/dev/null || true
+oc rollout status deployment/mcp-server -n "$PROJECT" $OC_CTX --timeout=300s
 
 # Get route (host and path)
-ROUTE_HOST=$(oc get route mcp-server -n $PROJECT -o jsonpath='{.spec.host}' 2>/dev/null || echo "")
-ROUTE_PATH=$(oc get route mcp-server -n $PROJECT -o jsonpath='{.spec.path}' 2>/dev/null || echo "/mcp/")
+ROUTE_HOST=$(oc get route mcp-server -n "$PROJECT" $OC_CTX -o jsonpath='{.spec.host}' 2>/dev/null || echo "")
+ROUTE_PATH=$(oc get route mcp-server -n "$PROJECT" $OC_CTX -o jsonpath='{.spec.path}' 2>/dev/null || echo "/mcp/")
 
 echo ""
 echo "========================================="
