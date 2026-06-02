@@ -1,4 +1,4 @@
-.PHONY: install run-local test test-local deploy clean help
+.PHONY: install run-local test test-local lint deploy clean help
 
 # Variables
 VENV ?= .venv
@@ -15,6 +15,7 @@ help:
 	@echo "  make run-local   - Run server locally (STDIO mode)"
 	@echo "  make test-local  - Test with cmcp locally"
 	@echo "  make test        - Run pytest suite"
+	@echo "  make lint        - Run ruff linter"
 	@echo ""
 	@echo "OpenShift Deployment:"
 	@echo "  make deploy      - Deploy to OpenShift (PROJECT=name [CONTEXT=name])"
@@ -45,6 +46,11 @@ test-local:
 # Run pytest tests
 test:
 	$(VENV)/bin/pytest tests/ -v
+
+# Run ruff linter
+lint:
+	@$(VENV)/bin/pip install -q ruff 2>/dev/null || true
+	$(VENV)/bin/ruff check src/ tests/
 
 # Deploy to OpenShift
 deploy:
