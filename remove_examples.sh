@@ -58,6 +58,11 @@ if [ -d "tests/examples" ]; then
     echo "✓ Removed tests/examples"
 fi
 
+if [ -f "tests/test_server_e2e.py" ]; then
+    rm -f tests/test_server_e2e.py
+    echo "✓ Removed tests/test_server_e2e.py"
+fi
+
 # Remove cache files
 echo ""
 echo "🧹 Cleaning cache files..."
