@@ -1,0 +1,14 @@
+apiVersion: mcps.ai/v1alpha1
+kind: VirtualMCPServer
+metadata:
+  name: ${SERVER_NAME}-curated
+spec:
+  # Tool names must be UNPREFIXED. The broker applies toolPrefix internally
+  # during matching. Using prefixed names here causes 0 tools to be returned.
+  registrationRef:
+    name: ${REGISTRATION_NAME}
+    namespace: ${SERVER_NAMESPACE}
+  tools:
+  # List specific tools to expose, or omit to expose all
+  # - name: tool_one
+  # - name: tool_two

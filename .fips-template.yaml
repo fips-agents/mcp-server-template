@@ -57,6 +57,8 @@ patch:
         - .dockerignore
         - .gitignore
         - .gitleaks.toml
+        - mcp-ecosystem.yaml.example
+        - manifests/ecosystem/*.yaml
       ask_before_patch: true
 
     claude:

@@ -1,0 +1,19 @@
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: ${SERVER_NAME}-auth
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: ${SERVER_NAME}
+  rules:
+    authentication:
+      jwt:
+        issuerUrl: https://keycloak.${CLUSTER_DOMAIN}/realms/${REALM}
+        audiences:
+        - mcp-gateway
+    authorization:
+      opa:
+        rego: |
+          allow { true }

@@ -1,0 +1,46 @@
+# MCP Ecosystem Integration Configuration
+#
+# Copy this file to mcp-ecosystem.yaml and customize for your cluster.
+# This configuration is used by deploy.sh to register the MCP server with
+# the RHOAI MCP ecosystem (gateway, catalog, and auth).
+
+mcp_ecosystem:
+  # Gateway configuration - routes traffic to MCP servers
+  gateway:
+    # Namespace where the MCP gateway is deployed
+    namespace: mcp-system
+    # Name of the gateway resource
+    name: mcp-gateway
+    # Section in the gateway config where this server will be registered
+    section_name: mcps
+    # Pattern for generating external routes (replace {cluster_domain} with your cluster's base domain)
+    hostname_pattern: "*.mcp.apps.{cluster_domain}"
+
+  # Catalog configuration - makes tools discoverable in UI
+  catalog:
+    # Namespace containing the MCP catalog ConfigMap
+    namespace: rhoai-model-registries
+    # ConfigMap name for the main catalog
+    configmap: mcp-catalog-sources
+    # Label identifying the source in catalog UI
+    source_label: "Red Hat MCP"
+    # ConfigMap for the playground environment
+    playground_configmap: gen-ai-aa-mcp-servers
+    # Namespace for the playground ConfigMap
+    playground_namespace: redhat-ods-applications
+
+  # Auth configuration - JWT-based authentication and authorization
+  auth:
+    # Set to true to enable auth via Keycloak/RHOAI SSO
+    enabled: false
+    # Keycloak realm name (typically mcp-gateway)
+    keycloak_realm: mcp-gateway
+    # Default Keycloak groups that can access this server (empty = all authenticated users)
+    default_groups: []
+
+  # CRITICAL: Tool prefix for namespacing tools in the catalog
+  # WARNING: Once set in MCPServerRegistration, this value is IMMUTABLE.
+  # Changing it requires deleting and recreating the MCPServerRegistration resource.
+  # Use a short, descriptive prefix like "weather_" or "finance_".
+  # Leave empty ("") if you don't need tool namespacing.
+  tool_prefix: ""

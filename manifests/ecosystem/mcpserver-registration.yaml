@@ -1,0 +1,12 @@
+apiVersion: mcps.ai/v1alpha1
+kind: MCPServerRegistration
+metadata:
+  name: ${SERVER_NAME}
+spec:
+  # WARNING: toolPrefix is IMMUTABLE once set. Choose carefully.
+  # The broker prepends this prefix to all tool names from this server.
+  # Leave empty for no prefix.
+  toolPrefix: "${TOOL_PREFIX}"
+  httpRouteRef:
+    name: ${SERVER_NAME}
+  serverPath: /mcp/

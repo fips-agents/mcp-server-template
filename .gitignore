@@ -52,6 +52,9 @@ uv.lock.*
 kubeconfig*
 *.kubeconfig
 
+# Ecosystem integration config (cluster-specific, copy from .example)
+mcp-ecosystem.yaml
+
 # Secrets patterns (do not commit)
 secrets*/
 secret*/

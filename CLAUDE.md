@@ -90,6 +90,14 @@ src/
 |-- resources/        # Resource implementations (standalone @resource decorator, supports subdirectories)
 |-- prompts/          # Prompt implementations (standalone @prompt decorator)
 +-- middleware/       # Middleware classes (extend fastmcp.server.middleware.Middleware)
+
+manifests/
++-- ecosystem/        # CR templates for MCP ecosystem integration (gateway, catalog, auth)
+    |-- httproute.yaml
+    |-- mcpserver-registration.yaml
+    |-- reference-grant.yaml
+    |-- authpolicy.yaml
+    +-- virtual-mcp-server.yaml
 ```
 
 ### Transport Modes
@@ -252,6 +260,8 @@ This template provides slash commands for a structured development workflow:
 /exercise-tools          -> Tests ergonomics by role-playing as consuming agent
         |
 /deploy-mcp PROJECT=x   -> Deploys to OpenShift (optional, for remote MCP servers)
+        |
+/integrate-mcp PROJECT=x -> Registers with gateway, catalog, and auth (optional)
 ```
 
 ### Slash Commands
@@ -262,6 +272,7 @@ This template provides slash commands for a structured development workflow:
 | `/create-tools` | Generate scaffolds with `fips-agents`, implement in parallel subagents |
 | `/exercise-tools` | Role-play as consuming agent, test usability, refine |
 | `/deploy-mcp PROJECT=x` | Pre-flight checks, deploy to OpenShift, verify with mcp-test-mcp |
+| `/integrate-mcp PROJECT=x` | Register with MCP gateway, catalog, and auth (post-deploy) |
 
 ### Tool Design Reference
 
@@ -324,6 +335,23 @@ mcp-test-mcp test_tool --server-url https://<route>/mcp/ \
 ```
 
 **Important**: If `mcp-test-mcp` tools are not available, ask to have it enabled before testing deployed MCP servers.
+
+## Ecosystem Integration
+
+After deploying with `/deploy-mcp`, use `/integrate-mcp` to register the server with the RHOAI MCP ecosystem. Configuration is stored in `mcp-ecosystem.yaml` (copy from `mcp-ecosystem.yaml.example`).
+
+```bash
+# Check integration status
+make integrate-check PROJECT=my-mcp-server
+```
+
+CR templates live in `manifests/ecosystem/` and use `${PLACEHOLDER}` variables for sed substitution.
+
+Key gotchas:
+- `toolPrefix` on MCPServerRegistration is **immutable** once set
+- The gateway broker must be restarted after registration changes
+- Playground ConfigMap entries must use ClusterIP URLs, not gateway URLs
+- Wristband `allowed-tools` must use **unprefixed** tool names
 
 ## Deployment Guidelines
 

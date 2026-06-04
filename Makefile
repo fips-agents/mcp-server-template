@@ -1,4 +1,4 @@
-.PHONY: install run-local test test-local lint deploy clean help
+.PHONY: install run-local test test-local lint deploy integrate-check clean help
 
 # Variables
 VENV ?= .venv
@@ -18,8 +18,9 @@ help:
 	@echo "  make lint        - Run ruff linter"
 	@echo ""
 	@echo "OpenShift Deployment:"
-	@echo "  make deploy      - Deploy to OpenShift (PROJECT=name [CONTEXT=name])"
-	@echo "  make clean       - Remove from OpenShift (PROJECT=name [CONTEXT=name])"
+	@echo "  make deploy          - Deploy to OpenShift (PROJECT=name [CONTEXT=name])"
+	@echo "  make integrate-check - Verify ecosystem integration (PROJECT=name [CONTEXT=name])"
+	@echo "  make clean           - Remove from OpenShift (PROJECT=name [CONTEXT=name])"
 	@echo ""
 	@echo "Other:"
 	@echo "  make help        - Show this help message"
@@ -56,6 +57,25 @@ lint:
 deploy:
 	@echo "Deploying to OpenShift project: $(PROJECT)"
 	./deploy.sh $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),)
+
+# Check ecosystem integration status (read-only)
+integrate-check:
+	@echo "Checking MCP ecosystem integration for project: $(PROJECT)"
+	@echo ""
+	@echo "--- HTTPRoute ---"
+	@oc get httproute -n $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),) 2>/dev/null || echo "  No HTTPRoute found"
+	@echo ""
+	@echo "--- MCPServerRegistration ---"
+	@oc get mcpserverregistration -n $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),) 2>/dev/null || echo "  No MCPServerRegistration found"
+	@echo ""
+	@echo "--- ReferenceGrant ---"
+	@oc get referencegrant -n $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),) 2>/dev/null || echo "  No ReferenceGrant found"
+	@echo ""
+	@echo "--- AuthPolicy ---"
+	@oc get authpolicy -n $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),) 2>/dev/null || echo "  No AuthPolicy found"
+	@echo ""
+	@echo "--- VirtualMCPServer ---"
+	@oc get virtualmcpserver -n $(PROJECT) $(if $(CONTEXT),--context=$(CONTEXT),) 2>/dev/null || echo "  No VirtualMCPServer found"
 
 # Clean up OpenShift deployment
 clean:
