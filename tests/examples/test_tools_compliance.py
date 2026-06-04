@@ -8,7 +8,6 @@ with standalone @tool decorators from fastmcp.tools.
 import ast
 from pathlib import Path
 
-import pytest
 
 
 TOOLS_DIR = Path(__file__).resolve().parent.parent.parent / "src" / "tools" / "examples"

@@ -1,6 +1,6 @@
 [project]
 name = "fastmcp-unified-template"
-version = "0.5.0"
+version = "0.6.0"
 description = "MCP server template using FastMCP 3.x with FileSystemProvider discovery, standalone decorators, and OpenShift deployment"
 requires-python = ">=3.11"
 authors = [{name = "Your Name", email = "you@example.com"}]

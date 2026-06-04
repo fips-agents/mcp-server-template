@@ -4,12 +4,10 @@ This file provides a pattern for implementing authentication middleware.
 Uncomment and customize based on your authentication requirements.
 """
 
-from typing import Any
 
 from fastmcp.server.middleware import CallNext, Middleware, MiddlewareContext
 import mcp.types as mt
 from fastmcp.tools.tool import ToolResult
-from fastmcp.exceptions import ToolError
 
 from src.core.logging import get_logger
 
